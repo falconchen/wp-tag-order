@@ -349,7 +349,7 @@ function wpto_menu() {
 	add_action( 'admin_print_scripts-' . $page_hook_suffix, 'wpto_admin_scripts' );
 	add_action( 'admin_init', 'register_wpto_settings' );
 }
-//add_action( 'admin_menu', 'wpto_menu' );
+add_action( 'admin_menu', 'wpto_menu' );
 
 /**
  * Load admin styles.
