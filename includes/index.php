@@ -88,6 +88,7 @@ function add_wpto_meta_box() {
 	foreach ( $screens as $screen ) {
 		$taxonomies = get_object_taxonomies( $screen );
 		if ( ! empty( $taxonomies ) ) {
+			$taxonomies = apply_filters('pre_filter_taxonomies',$taxonomies);
 			foreach ( $taxonomies as $taxonomy ) {
 				if ( ! is_taxonomy_hierarchical( $taxonomy ) && 'post_format' !== $taxonomy ) {
 					$obj   = get_taxonomy( $taxonomy );
