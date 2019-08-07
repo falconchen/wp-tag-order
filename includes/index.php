@@ -34,8 +34,33 @@ function wpto_meta_box_markup( $object, $metabox ) {
 	<?php
 	$taxonomy   = $metabox['args']['taxonomy'];
 	$tags_value = get_post_meta( $object->ID, 'wp-tag-order-' . $taxonomy, true );
-	$tags       = array();
-	$tags       = unserialize( $tags_value );
+
+
+	//$tags = wp_get_post_terms( $object->ID, $taxonomy, ['fields' => 'tt_ids'] );
+
+
+	if($tags_value != '') {
+		$tags       = unserialize( $tags_value );
+	}else{
+
+		if($taxonomy == 'post_tag' && class_exists('TagsOrder')) {
+			$tags = wp_get_post_terms( $object->ID, $taxonomy);
+
+			$tags_order_tags = TagsOrder::custom_tags_order($tags,$object->ID,'post_tag');
+			if(!empty($tags_order_tags)) {
+				$tags = array();
+				foreach($tags_order_tags as $t) {
+					$tags[] = $t->term_id;
+				}
+			}
+
+		}else{
+			$tags = wp_get_post_terms( $object->ID, $taxonomy, ['fields' => 'tt_ids'] );
+		}
+
+	}
+
+
 	if ( ! wto_is_array_empty( $tags ) ) :
 		foreach ( $tags as $tagid ) :
 			$tag = get_term_by( 'id', $tagid, $taxonomy );
@@ -214,7 +239,8 @@ function ajax_wto_sync_tags() {
 		$newtagsids = array();
 		foreach ( $newtags as $newtag ) {
 			$term = term_exists( $newtag, sanitize_text_field( wp_unslash( $taxonomy ) ) );
-			if ( 0 === $term && null === $term ) {
+
+			if ( null === $term ) {
 				$term_taxonomy_ids = wp_set_object_terms( sanitize_text_field( wp_unslash( $id ) ), $newtag, sanitize_text_field( wp_unslash( $taxonomy ) ), true );
 				if ( is_wp_error( $term_taxonomy_ids ) ) {
 					exit;
