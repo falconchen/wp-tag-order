@@ -51,7 +51,14 @@ function get_the_terms_ordered( $post_id, $taxonomy ) {
 			);
 		}
 	} else {
-		$return = false;
+
+		$return = wp_get_post_terms($post_id, $taxonomy);
+
+		if($taxonomy == 'post_tag' && class_exists('TagsOrder')) {
+			$return = TagsOrder::custom_tags_order($return,$post_id,'post_tag');
+		}
+
+		//$return = false;
 	}
 
 	return apply_filters( 'get_the_tags', $return );
