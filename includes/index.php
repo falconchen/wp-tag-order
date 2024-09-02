@@ -174,9 +174,53 @@ function save_wpto_meta_box( $post_id, $post, $update ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				$meta_box_tags_value = '';
 				$fieldname           = 'wp-tag-order-' . $taxonomy;
-				if ( isset( $_POST[ $fieldname ] ) ) {
-					$meta_box_tags_value = serialize( $_POST[ $fieldname ] );
+
+				// 如果post_tag，则使用TagsOrder类中的custom_tags_order方法
+
+
+
+				if($taxonomy == 'post_tag') {
+
+
+					if ( isset( $_POST['wp-tag-order-post_tag'] ) ) {
+
+						$wto_tags_ids = $_POST['wp-tag-order-post_tag'];
+						$tags = wp_get_post_terms( $post_id, 'post_tag');
+						$post_tags_ids = array();
+						foreach($tags as $tag) {
+							$post_tags_ids[] = strval($tag->term_id);
+						}
+
+
+						// 新的逻辑开始
+						$new_tags_ids = array();
+
+						// 1. 保留在 $wto_tags_ids 中存在且在 $post_tags_ids 中也存在的元素
+						foreach ($wto_tags_ids as $tag_id) {
+							if (in_array($tag_id, $post_tags_ids)) {
+								$new_tags_ids[] = $tag_id;
+							}
+						}
+
+						// 2. 追加在 $post_tags_ids 中存在但在 $wto_tags_ids 中不存在的元素
+						foreach ($post_tags_ids as $tag_id) {
+							if (!in_array($tag_id, $wto_tags_ids)) {
+								$new_tags_ids[] = $tag_id;
+							}
+						}
+
+						// 使用新生成的数组
+						$meta_box_tags_value = serialize($new_tags_ids);
+					}
+
+
+				}else{
+					if ( isset( $_POST[ $fieldname ] ) ) {
+						$meta_box_tags_value = serialize( $_POST[ $fieldname ] );
+
+					}
 				}
+
 				update_post_meta( $post_id, $fieldname, $meta_box_tags_value );
 			}
 		}
